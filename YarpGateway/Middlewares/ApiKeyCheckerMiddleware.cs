@@ -1,10 +1,10 @@
 ﻿namespace YarpGateway.Middlewares
 {
-    public class ApiKeyMiddleware
+    public class ApiKeyCheckerMiddleware
     {
         private readonly RequestDelegate _next;
 
-        public ApiKeyMiddleware(RequestDelegate next)
+        public ApiKeyCheckerMiddleware(RequestDelegate next)
         {
             this._next = next;
         }
@@ -22,7 +22,7 @@
 
             // API Key is valid
             await _next(context);
-            await context.Response.WriteAsync("Valid API Key");
+            //await context.Response.WriteAsync("Valid API Key");
         }
 
         private bool IsValidApiKey(string apiKey)
@@ -32,11 +32,11 @@
             return validApiKeys.Contains(apiKey);
         }
     }
-    public static class ApiKeyMiddlewareExtension
+    public static class ApiKeyCheckerMiddlewareExtension
     {
-        public static void UseApiKey(this IApplicationBuilder builder)
+        public static void UseApiKeyChecker(this IApplicationBuilder builder)
         {
-            builder.UseMiddleware<ApiKeyMiddleware>();
+            builder.UseMiddleware<ApiKeyCheckerMiddleware>();
         }
     }
 }

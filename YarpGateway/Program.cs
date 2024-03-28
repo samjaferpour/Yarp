@@ -48,7 +48,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseApiKey();
+app.UseIpChecker();
+
+app.UseApiKeyChecker();
 
 app.UseAuthentication();
 
