@@ -1,8 +1,6 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
+using YarpGateway.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +10,7 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 
 // Add Yarp
 builder.Services.AddReverseProxy()
@@ -28,29 +27,16 @@ builder.Services.AddRateLimiter(rateLimiterOptions =>
 });
 
 
-/*// Add JWT authentication services
+// Add Authentication to Yarp
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true, // Set to true if you want to validate the JWT issuer
-            ValidateAudience = true, // Set to true if you want to validate the JWT audience
-            ValidateLifetime = true, // Set to true if you want to validate the token expiration
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = "yourIssuer", // Replace with the issuer of your JWT tokens
-            ValidAudience = "yourAudience", // Replace with the audience of your JWT tokens
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("yourSecretKey")) // Replace with your JWT secret key
-        };
-    });
-
+    .AddJwtBearer();
 
 // Add Authorization to Yarp
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("secure", policy =>
-    policy.RequireAuthenticatedUser());
-});*/
+    options.AddPolicy("authenticated", policy =>
+        policy.RequireAuthenticatedUser());
+});
 
 
 var app = builder.Build();
@@ -62,14 +48,16 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseApiKey();
+
 app.UseAuthentication();
 
 app.UseAuthorization();
 
+app.UseRateLimiter();
+
 app.MapReverseProxy();
 
 app.MapControllers();
-
-app.UseRateLimiter();
 
 app.Run();
